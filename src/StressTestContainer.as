@@ -1,11 +1,13 @@
 package
 {
 	import com.mintdigital.hemlock.HemlockEnvironment;
+	import com.mintdigital.hemlock.Logger;
 	import com.mintdigital.hemlock.containers.HemlockContainer;
 	import com.mintdigital.hemlock.data.JID;
 	import com.mintdigital.hemlock.events.AppEvent;
 	import com.mintdigital.hemlock.skins.hemlockSoft.HemlockSoftSkin;
 	import com.mintdigital.hemlock.widgets.debug.DebugWidget;
+	
 	import org.jivesoftware.xiff.im.Roster;
 
 	public class StressTestContainer extends HemlockContainer
@@ -25,7 +27,7 @@ package
 
 		override protected function initialize():void{
 			HemlockEnvironment.ENVIRONMENT  = HemlockEnvironment.ENVIRONMENT_DEVELOPMENT;
-			HemlockEnvironment.SERVER       = 'localhost';
+			HemlockEnvironment.SERVER       = 'ejb.playcrab.com';
 			HemlockEnvironment._debug       = true; 			
 		}
 
@@ -40,7 +42,13 @@ package
             registerListener(dispatcher, AppEvent.SESSION_CREATE_FAILURE, onSessionCreateFailure);
 			registerListener(dispatcher, AppEvent.CONFIGURATION_START, onConfigurationStart);
 			registerListener(dispatcher, AppEvent.ROOM_JOINED,onRoomJoined);
+//			registerListener(dispatcher, AppEvent.ROSTER_LOADED,onRoomJoined);
 		}
+		
+//		private function onRosterLoaded(event:AppEvent):void {
+//			var roster:Roster = event.options as Roster;
+//			Logger.("Roster: "+roster.toString());
+//		}
 		
 		private function onRoomJoined(event:AppEvent):void{
 			sendMessage(event.jid.bareJID, "All glory is fleeting");			
