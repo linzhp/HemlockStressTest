@@ -1,13 +1,13 @@
 package
 {
 	import com.mintdigital.hemlock.HemlockEnvironment;
-	import com.mintdigital.hemlock.Logger;
 	import com.mintdigital.hemlock.containers.HemlockContainer;
 	import com.mintdigital.hemlock.data.JID;
 	import com.mintdigital.hemlock.events.AppEvent;
 	import com.mintdigital.hemlock.skins.hemlockSoft.HemlockSoftSkin;
 	import com.mintdigital.hemlock.widgets.debug.DebugWidget;
 	
+	import org.jivesoftware.xiff.events.RosterEvent;
 	import org.jivesoftware.xiff.im.Roster;
 
 	public class StressTestContainer extends HemlockContainer
@@ -15,6 +15,7 @@ package
 		private var _username:String;
 		private var _password:String;
 		private var _session:JID;
+		private var _roster:Roster;
 		
 		public function StressTestContainer(account:String = "stress")
 		{
@@ -27,7 +28,7 @@ package
 
 		override protected function initialize():void{
 			HemlockEnvironment.ENVIRONMENT  = HemlockEnvironment.ENVIRONMENT_DEVELOPMENT;
-			HemlockEnvironment.SERVER       = 'ejb.playcrab.com';
+			HemlockEnvironment.SERVER       = 'localhost';
 			HemlockEnvironment._debug       = true; 			
 		}
 
@@ -42,13 +43,18 @@ package
             registerListener(dispatcher, AppEvent.SESSION_CREATE_FAILURE, onSessionCreateFailure);
 			registerListener(dispatcher, AppEvent.CONFIGURATION_START, onConfigurationStart);
 			registerListener(dispatcher, AppEvent.ROOM_JOINED,onRoomJoined);
-//			registerListener(dispatcher, AppEvent.ROSTER_LOADED,onRoomJoined);
+			registerListener(dispatcher, AppEvent.ROSTER_LOADED,onRosterLoaded);
 		}
 		
-//		private function onRosterLoaded(event:AppEvent):void {
-//			var roster:Roster = event.options as Roster;
-//			Logger.("Roster: "+roster.toString());
-//		}
+		private function onRosterLoaded(event:AppEvent):void {
+			_roster = event.options.roster as Roster;
+//			_roster.requestSubscription(new JID("tracy@localhost"),true); 
+			_roster.addEventListener(RosterEvent.SUBSCRIPTION_REQUEST, onSubscriptionRequest);
+		}
+		
+		private function onSubscriptionRequest(event:RosterEvent):void{
+			_roster.grantSubscription(event.jid);
+		}
 		
 		private function onRoomJoined(event:AppEvent):void{
 			sendMessage(event.jid.bareJID, "All glory is fleeting");			
@@ -59,14 +65,14 @@ package
 		}
 		
 		public function visit(account:String):void{
-			joinChatRoom(buildJID(account));			
+			joinChatRoom(buildAppJID(account));			
 		}
 		
 		public function leave(account:String):void{
-			leaveChatRoom(buildJID(account));
+			leaveChatRoom(buildAppJID(account));
 		}
 		
-		private function buildJID(account:String):JID{
+		private function buildAppJID(account:String):JID{
 			return new JID(JID.TYPE_APP+"_"+account+"@"+domain);
 		}
 

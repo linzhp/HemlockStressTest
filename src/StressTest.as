@@ -7,7 +7,7 @@ package
 	{
 		public function StressTest()
 		{
-			var container:StressTestContainer = new StressTestContainer("stress");
+			var container:StressTestContainer = new StressTestContainer("philip");
 			addChild(container);
 		}
 	}
