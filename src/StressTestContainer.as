@@ -9,6 +9,7 @@ package
 	
 	import org.jivesoftware.xiff.events.RosterEvent;
 	import org.jivesoftware.xiff.im.Roster;
+	import org.jivesoftware.xiff.data.im.RosterItemVO;
 
 	public class StressTestContainer extends HemlockContainer
 	{
@@ -16,6 +17,7 @@ package
 		private var _password:String;
 		private var _session:JID;
 		private var _roster:Roster;
+		private var _friends:Array;
 		
 		public function StressTestContainer(account:String = "stress")
 		{
@@ -24,6 +26,10 @@ package
             HemlockEnvironment.SKIN = HemlockSoftSkin;
             
 			signIn(_username,_password); 			
+		}
+		
+		public function set friends(f:Array):void{
+			_friends = f;
 		}
 
 		override protected function initialize():void{
@@ -48,8 +54,18 @@ package
 		
 		private function onRosterLoaded(event:AppEvent):void {
 			_roster = event.options.roster as Roster;
-//			_roster.requestSubscription(new JID("tracy@localhost"),true); 
 			_roster.addEventListener(RosterEvent.SUBSCRIPTION_REQUEST, onSubscriptionRequest);
+			if(_friends)
+			{
+				for each(var f:String in _friends)
+				{
+					var fJID:JID = new JID(f+"@"+HemlockEnvironment.SERVER);
+					var item:RosterItemVO = RosterItemVO.get(fJID,false);
+					if(!item || (item.subscribeType != "to" && item.subscribeType != "both" )){
+						_roster.requestSubscription(fJID,true); 						
+					}
+				}
+			}
 		}
 		
 		private function onSubscriptionRequest(event:RosterEvent):void{
