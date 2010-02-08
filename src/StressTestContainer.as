@@ -77,7 +77,7 @@ package
 		}
 		
 		override protected function onSessionCreateSuccess(event:AppEvent):void {
-			visit(_username);
+//			visit(_username);
 		}
 		
 		public function visit(account:String):void{
