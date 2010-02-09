@@ -1,13 +1,15 @@
 package
 {
 	import com.mintdigital.hemlock.HemlockEnvironment;
-	import com.mintdigital.hemlock.Logger;
 	import com.mintdigital.hemlock.containers.HemlockContainer;
 	import com.mintdigital.hemlock.data.JID;
 	import com.mintdigital.hemlock.events.AppEvent;
 	import com.mintdigital.hemlock.skins.hemlockSoft.HemlockSoftSkin;
 	import com.mintdigital.hemlock.widgets.debug.DebugWidget;
+	import com.playcrab.base.interfaces.ISlide;
 	
+	import org.jivesoftware.xiff.data.im.RosterItemVO;
+	import org.jivesoftware.xiff.events.RosterEvent;
 	import org.jivesoftware.xiff.im.Roster;
 
 	public class StressTestContainer extends HemlockContainer
@@ -15,6 +17,9 @@ package
 		private var _username:String;
 		private var _password:String;
 		private var _session:JID;
+		private var _roster:Roster;
+		private var _friends:Array = [];
+		private var _isLoggedIn:Boolean = false;
 		
 		public function StressTestContainer(account:String = "stress")
 		{
@@ -23,6 +28,26 @@ package
             HemlockEnvironment.SKIN = HemlockSoftSkin;
             
 			signIn(_username,_password); 			
+		}
+		
+		public function set friends(friends:Array):void{
+			_friends = friends;
+			if(_isLoggedIn)
+			{
+				var count:int =0;
+				for each(var f:String in friends)
+				{
+					var fJID:JID = new JID(f+"@"+HemlockEnvironment.SERVER);
+					var item:RosterItemVO = RosterItemVO.get(fJID,false);
+					if(!item || (item.subscribeType != "to" && item.subscribeType != "both")){
+						if(count>10)
+							break;
+						_roster.requestSubscription(fJID,true); 		
+						count++;
+					}
+				}
+			}
+
 		}
 
 		override protected function initialize():void{
@@ -42,31 +67,36 @@ package
             registerListener(dispatcher, AppEvent.SESSION_CREATE_FAILURE, onSessionCreateFailure);
 			registerListener(dispatcher, AppEvent.CONFIGURATION_START, onConfigurationStart);
 			registerListener(dispatcher, AppEvent.ROOM_JOINED,onRoomJoined);
-//			registerListener(dispatcher, AppEvent.ROSTER_LOADED,onRoomJoined);
+			registerListener(dispatcher, AppEvent.ROSTER_LOADED,onRosterLoaded);
 		}
 		
-//		private function onRosterLoaded(event:AppEvent):void {
-//			var roster:Roster = event.options as Roster;
-//			Logger.("Roster: "+roster.toString());
-//		}
+		private function onRosterLoaded(event:AppEvent):void {
+			_roster = event.options.roster as Roster;
+			_roster.addEventListener(RosterEvent.SUBSCRIPTION_REQUEST, onSubscriptionRequest);
+		}
+		
+		private function onSubscriptionRequest(event:RosterEvent):void{
+			_roster.grantSubscription(event.jid, false);
+		}
 		
 		private function onRoomJoined(event:AppEvent):void{
 			sendMessage(event.jid.bareJID, "All glory is fleeting");			
 		}
 		
 		override protected function onSessionCreateSuccess(event:AppEvent):void {
-			visit(_username);
+			_isLoggedIn = true;
+//			visit(_username);
 		}
 		
 		public function visit(account:String):void{
-			joinChatRoom(buildJID(account));			
+			joinChatRoom(buildAppJID(account));			
 		}
 		
 		public function leave(account:String):void{
-			leaveChatRoom(buildJID(account));
+			leaveChatRoom(buildAppJID(account));
 		}
 		
-		private function buildJID(account:String):JID{
+		private function buildAppJID(account:String):JID{
 			return new JID(JID.TYPE_APP+"_"+account+"@"+domain);
 		}
 
