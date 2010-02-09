@@ -6,11 +6,10 @@ package
 	import com.mintdigital.hemlock.events.AppEvent;
 	import com.mintdigital.hemlock.skins.hemlockSoft.HemlockSoftSkin;
 	import com.mintdigital.hemlock.widgets.debug.DebugWidget;
-	import com.playcrab.base.interfaces.ISlide;
-	
 	import org.jivesoftware.xiff.data.im.RosterItemVO;
 	import org.jivesoftware.xiff.events.RosterEvent;
 	import org.jivesoftware.xiff.im.Roster;
+	import org.jivesoftware.xiff.data.im.RosterItemVO;
 
 	public class StressTestContainer extends HemlockContainer
 	{
@@ -52,7 +51,7 @@ package
 
 		override protected function initialize():void{
 			HemlockEnvironment.ENVIRONMENT  = HemlockEnvironment.ENVIRONMENT_DEVELOPMENT;
-			HemlockEnvironment.SERVER       = 'ejb.playcrab.com';
+			HemlockEnvironment.SERVER       = 'localhost';
 			HemlockEnvironment._debug       = true; 			
 		}
 
