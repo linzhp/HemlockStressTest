@@ -103,7 +103,7 @@ package
 			var jid:JID = event.from;
 			if(jid.type == JID.TYPE_APP)
 			{
-				this.configureChatRoom(jid, {'muc#roomconfig_persistentroom' : [1],'muc#roomconfig_publicroom' : [0]});
+				this.configureChatRoom(jid, {'muc#roomconfig_publicroom' : [0]});
 			}
 		}
 		
